@@ -3,9 +3,9 @@
     /*
         ESTA FUNCION SE ENCARGA DE RECOGER EL ARRAY $check, QUE ALBERGA 
         LAS COINCIDENCIAS ESTABLECIDAS POR LOS PATRONES DE LA FUNCION  searchPatron,
-        Y EL ARRAY $match, QUE ALBERGA LA LISTA DE ACUMULACIONES DE FECHAS O PRECIOS, SEGUN CORRESPONDA.
+        Y EL ARRAY $match.
 
-        LA FUNCION PRINCIPAL ES AÑADIR AL ARRAY $match AQUELLOS ELEMENTOS QUE NO ESTEN YA EN ELLA
+        LA FUNCION PRINCIPAL ES AÑADIR AL ARRAY $match LOS ELEMENTOS DE FORMA QUE NO ESTEN REPETIDOS
     */
 
     function addNuevo($check,$match){     
@@ -18,6 +18,9 @@
 
             #ACUMULACION EN $matchFecha DE RESULTADOS NUEVOS
             $match = array_merge($match,$diff);
+
+            #ELIMINACION DE ELEMENTOS REPETIDOS
+            $match = array_unique($match);
             
         } 
 
@@ -25,8 +28,7 @@
     }
 
     /*
-        ESTA FUNCION VA DEDICADA A FRAGMENTAR LA CADENA ENTRANTE
-        FACILITANDO ASI LA BUSQUEDA DE LOS ELEMENTOS SIGUIENDO LOS PATRONES ESTABLECIDOS
+        ESTA FUNCION VA DEDICADA A LA BUSQUEDA DE LOS ELEMENTOS SIGUIENDO LOS PATRONES ESTABLECIDOS
         POSTERIORMENTE GENERA 2 ARRAY, UNO CON FECHAS Y OTRO CON PRECIOS
         
         DICHOS ARRAYS SERAN RELLENADOS CON LOS DATOS ENCONTRADOS EN LAS CADENAS DE TEXTO
@@ -44,24 +46,18 @@
         #PATRON PARA BUSQUEDA DEL PRECIOS
         $patronPrecio = "/(-?\d{1,4}\.\d{1,2})|(-?\d{1,4},\d{1,2})/";
 
-        #DIVISION DE LA CADENA POR SALTOS DE LINEA
-        $arrayCadena = explode("\n", $cadena);
-        
-        #RECORRIDO DE LOS TROZOS DE LA CADENA
-        foreach($arrayCadena as $partes){
-            
-            #COMPROBACION SI EL TROZO DE CADENA CONTIENE ALGUNO DE LOS PATRONES ESTABLECIDOS Y EN CASO AFIRMATIVO SE GUARDA EN SU ARRAY $check CORRESPONDIENTE
-            if(preg_match_all($patronFecha,$partes, $checkFecha,PREG_PATTERN_ORDER) || preg_match_all($patronPrecio,$partes, $checkPrecio,PREG_PATTERN_ORDER)){
-                
-                #EN CASO QUE ALGUN $check NO SEA NULO LLAMAMOS A LA FUNCION PARA AÑADIR LAS NOVEDADES A SU RESPECTIVO ARRAY
-                if($checkPrecio != null){
-                    $matchPrecio = addNuevo($checkPrecio,$matchPrecio);
-                } 
+        #SE RECOGEN LOS ELEMENTOS ENCONTRADOS POR LOS PATRONES Y SE RELLENAN LOS ARRAYS
 
-                if($checkFecha != null){
-                    $matchFecha = addNuevo($checkFecha,$matchFecha);
-                }        
-            }    
+        if(preg_match_all($patronFecha,$cadena, $checkFecha,PREG_PATTERN_ORDER)){
+        
+            $matchFecha = addNuevo($checkFecha,$matchFecha);
+        
+        }
+
+        if(preg_match_all($patronPrecio,$cadena, $checkPrecio,PREG_PATTERN_ORDER)){
+            
+            $matchPrecio = addNuevo($checkPrecio,$matchPrecio);
+        
         }
 
         $total[0] = $matchFecha;
@@ -118,7 +114,7 @@
     foreach($fechas as $dates){
         echo "---  ".$dates."<br>"; 
     }
-    echo "<h3>Precio</h3>";
+    echo "<h3>Precios</h3>";
     foreach($precios as $prices){
         echo "---  ".$prices."<br>"; 
     }
